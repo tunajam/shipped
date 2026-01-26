@@ -1,0 +1,50 @@
+name: 'Shipped'
+description: 'Auto-generate beautiful changelogs from merged PRs using AI'
+author: 'tunajam'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  mode:
+    description: 'Mode to run: entry (per-PR) or weekly (digest)'
+    required: true
+    default: 'entry'
+  api-key:
+    description: 'API key for AI provider (OpenAI, OpenRouter, or compatible)'
+    required: true
+  provider:
+    description: 'AI provider: openai, openrouter, or custom base URL'
+    required: false
+    default: 'openai'
+  model:
+    description: 'Model to use (e.g., gpt-4o-mini, anthropic/claude-3-haiku)'
+    required: false
+    default: 'gpt-4o-mini'
+  changelog-path:
+    description: 'Path to CHANGELOG.md'
+    required: false
+    default: 'CHANGELOG.md'
+  weekly-path:
+    description: 'Path to WEEKLY.md'
+    required: false
+    default: 'WEEKLY.md'
+  include-labels:
+    description: 'Only include PRs with these labels (comma-separated, empty = all)'
+    required: false
+    default: ''
+  exclude-labels:
+    description: 'Exclude PRs with these labels (comma-separated)'
+    required: false
+    default: 'skip-changelog,no-changelog'
+
+outputs:
+  entry:
+    description: 'The generated changelog entry'
+  updated:
+    description: 'Whether the changelog was updated'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

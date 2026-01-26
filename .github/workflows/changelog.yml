@@ -1,0 +1,88 @@
+name: Changelog
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  schedule:
+    # Weekly digest - Sundays at 6pm UTC
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode to run'
+        required: true
+        default: 'weekly'
+        type: choice
+        options:
+          - entry
+          - weekly
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  changelog-entry:
+    name: Generate Changelog Entry
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate changelog entry
+        uses: ./
+        with:
+          mode: entry
+          api-key: ${{ secrets.OPENAI_API_KEY }}
+          # provider: openrouter  # Optional: use OpenRouter instead
+          # model: gpt-4o-mini    # Optional: specify model
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "Shipped Bot"
+          git config user.email "shipped@users.noreply.github.com"
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: changelog for #${{ github.event.pull_request.number }}"
+            git push
+          fi
+
+  weekly-digest:
+    name: Generate Weekly Digest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'weekly')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate weekly digest
+        uses: ./
+        with:
+          mode: weekly
+          api-key: ${{ secrets.OPENAI_API_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "Shipped Bot"
+          git config user.email "shipped@users.noreply.github.com"
+          git add WEEKLY.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: weekly digest $(date +%Y-%m-%d)"
+            git push
+          fi

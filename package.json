@@ -1,0 +1,31 @@
+{
+  "name": "shipped",
+  "version": "0.1.0",
+  "description": "Auto-generate beautiful changelogs from merged PRs using AI",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "dev": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "bun test"
+  },
+  "keywords": [
+    "github-action",
+    "changelog",
+    "ai",
+    "automation"
+  ],
+  "author": "tunajam",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vercel/ncc": "^0.38.1",
+    "typescript": "^5.3.3"
+  }
+}
